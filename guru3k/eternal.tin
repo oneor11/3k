@@ -1,0 +1,25 @@
+#class {eternal} {open}
+
+	#var {eternal[heal][cooldown]} {730};
+	#var {eternal[ewell][cooldown]} {1850};
+	#var {hasHeal} {1};
+	#var {hasEwell} {0};
+
+	#ticker {ewellreset} {
+		#var {hasEwell} {1};
+        } ${eternal[ewell][cooldown]};
+
+	#action {^You bathe%!{.*}in the healing powers of the outer planes.} {
+		#var {hasHeal} {0};
+		#ticker {healreset} {
+			#var {hasHeal} {1};
+		} ${eternal[heal][cooldown]};
+	};
+
+	#action {^A shimmering ball of energy appears magically when you snap your fingers.} {
+		#var {hasEwell} {0};
+		#ticker {ewellreset} {
+			#var {hasEwell} {1};
+		} ${eternal[ewell][cooldown]};
+	};
+#class {eternal} {close}

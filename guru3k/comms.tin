@@ -1,0 +1,27 @@
+#class {comms} {open}
+
+	#var tell 1;
+	
+	#action {^{\w+} tells you%!{.*}: {.*}} {
+		#if {${tell}} {
+			sendmail %1 "{%2}";
+			soundAlarm 2 {TELL ALERT!!!!!};
+		};
+	};
+
+	#action {^{\w+} LTs} {
+		sendmail %1 "LT";
+		soundAlarm 2 {TELL ALERT!!!!!};
+	};
+
+	#action {^There is no reason to 'ffetch' here} {
+		cast find familiar;
+		ffetch gem;
+	};
+	
+	#alias sendmail {
+		#showme Sending mail...;
+		#SCRIPT {/home/jprougeau/.tt/scripts/mail.sh %1 %2};
+
+	};
+#class {comms} {close}

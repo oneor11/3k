@@ -1,0 +1,195 @@
+#class {guru} {open}
+
+#var guild mage;
+
+#NOP Read in char-specific files
+#read .tt/char/guru3k/mage/defense.tin;
+#read .tt/char/guru3k/mage/utility.tin;
+#read .tt/char/guru3k/comms.tin;
+#read .tt/char/guru3k/alarm.tin;
+#read .tt/char/guru3k/interaction.tin;
+#read .tt/char/guru3k/eternal.tin;
+#read .tt/char/guru3k/damagecounter.tin;
+#read .tt/3k/reforger.tin;
+#read .tt/char/guru3k/mage/sptracker.tin;
+#read .tt/char/guru3k/death.tin;
+
+#var {resting} {0};
+#var {corpsestrat} {0};
+#var {alertcorpses} {1};
+
+#act {{^ PROT:.*COF:(\d+)\/(\d+)}} {
+	#var {magebar[cof][current]}	{%2};
+	#var {magebar[cof][max]}	{%3};
+};
+
+#act {^ HP: {\d+}/{\d+} SP: {\d+}/{\d+}/{\d+}%/{\d+}% Sat: {\d+} Cnc: {\d+} G/MI: {\d+}/{\d+}/{\d+}% ER: {\d+}/{\d+}% G2N: {\d+}%} {
+	#var {sptracker[spPrevious]}	{$sptracker[spCurrent]}; 
+	#var {sptracker[hpPrevious]}	{$sptracker[hpCurrent]};
+	#var {magebar[hp][current]}	{%1};
+	#var {magebar[hp][max]}		{%2};
+	#var {magebar[sp][current]}	{%3};
+	#var {magebar[sp][max]}		{%4};
+	#var {magebar[mc]}		{%5};
+	#var {magebar[gem]}		{%6};
+	#var {magebar[sat]}		{%7};
+	#var {magebar[conc]}		{%8};
+	#var {magebar[gol]}		{%9};
+	#var {magebar[imm]}		{%10};
+	#var {magebar[magreset]}	{%11};
+	#var {magebar[er]}		{%12};
+	#var {magebar[screset]}		{%13};
+	#var {magebar[g2n]}		{%14};
+	#var {sptracker[spCurrent]}	{$magebar[sp][current]};
+	#var {sptracker[hpCurrent]}	{$magebar[hp][current]};
+	
+
+	#NOP Depends on sptracker.tin. See that file for important information.;
+	#IF {$sptracker[on]} {
+		calculateBaseSpRegen;
+	};
+
+	#NOP Don't let a mystic immersion go to waste. If one is available before reset, use it.;
+	#if {${magebar[magreset]} > 94 && ${magebar[imm]} > 0} {
+		#SEND !cast mystic immersion;
+	};
+
+	#NOP This is covered by health.reflexes.  But kept here anyway.;
+	#if {${magebar[sat]} > 93} {
+		#SEND !cast secure shelter;
+	};
+
+
+	#NOP If a mystic immersion is available use it when sps dip below 4000;
+	#if {${magebar[sp][current]} < 4000 && ${magebar[imm]} > 0} {
+		#SHOWME !cast mystic immersion;
+		#SEND !cast mystic immersion;
+	};
+	
+
+	#NOP If an explosive release is available, use it if sat gets above 85.;
+	#NOP My health.reflexes for corpse unwrap/blast fire after 85;
+	#if {${magebar[sat]} > 85 && ${magebar[er]} > 0} {
+		#SHOWME !cast explosive release;
+		#SEND !cast explosive release;
+	};
+	
+
+	#NOP Leverage eternal heal to minimize downtime;
+	#NOP Depends on eternal.tin. See that file for important information.;
+	#if {${magebar[sp][current]} < 3600 && !${resting} && ${hasHeal}} {
+		#SHOWME !(heal guru;
+		#SEND !(heal guru;
+	};
+
+	#NOP Dire situation;
+	#NOP If sps dip below 900, a mage contingency is set to secure shelter.;
+	#if {${magebar[sp][current]} < 1700  && ${magebar[sat]} < 85} {
+		#SHOWME !hmheal, !cast spell tap;
+		#SEND !hmheal;
+		#SEND !cast spell tap;
+	};
+};
+
+#alias update_status {
+	
+};
+
+
+#NOP This is called from the kblow trigger in bot_main.tin;
+#alias stepCharPostKillChecks {
+	resetNoKill;
+	#IF {${trackDamage}} { 
+		showDamageSummary; 
+		#VAR sptracker[totHpSpent] {0};
+	};
+
+	#if {${magebar[cof][current]} < 12 && ${alertcorpses}} {
+		sendmail ${magebar[cof][current]} "Corpses";
+	};
+
+	#NOP Mage light duration is low. Always ensure a fresh light after kill.;
+	#showme Doing light stuff;
+	#SEND !dislight;
+	#SEND !cast light;
+	#SEND !keep light;
+	#delay {2};
+
+	#NOP Try to keep gem above 60;
+	#showme Doing gem stuff;
+	#if {$magebar[gem] < 60} {
+		#showme !ffetch gem;
+		#SEND !ffetch gem;
+	};
+	
+	#NOP Depends on reforger.tin. See that file for more information;
+	#if {${magebar[sp][current]} > 3200 && ${hasReforge} && ${doReforge}} {
+		refxpmage;
+	};
+
+	#if {${magebar[cof][current]} < 13 && ("${area}" == "Section Z" || "${area}" == "Mahjongg") && ${corpsestrat}} {
+		.stop;
+		#DELAY {4} {
+			#SEND !pause game;
+			#DELAY {4} {
+				nextarea;
+				#DELAY {2} {
+					rating;
+					v off;
+				};
+			};
+		};
+	};
+
+	#if {${magebar[cof][current]} == ${magebar[cof][max]} && "${area}" == "Chess Board" && ${corpsestrat}} {
+		.stop;
+		nextarea;
+		#DELAY {2} {
+			rating;
+		};
+	};
+
+	#NOP If sps dip below 3200 or mental cognition is low after a kill, I rest until sps are full and sat < 40; 
+	#NOP See 'rest' alias below.;
+	#showme Checking mage sps;
+	#if {${magebar[sp][current]} < 3200 || ${magebar[mc]} < 85} {
+		#SEND !hp;
+		#SEND study spellbook;
+		rest;
+	}
+	{
+		#showme Resuming from light check...;
+		#if {!$singlestep} {
+			#if {${magebar[mc]} < 98} {
+				study spellbook;
+				#DELAY {4} {
+					.bot;
+				};
+			} {
+				.bot;
+
+			};
+		};
+	};
+};
+
+#alias rest {
+	#VAR {resting} {1};
+	#SEND !hp;
+	#if {${magebar[sp][current]} < ${magebar[sp][max]} || ${magebar[sat]} > 40} {
+		#SHOWME Recovering...;
+		#DELAY {5} {
+			rest;
+		};
+	}
+	{
+		#VAR {resting} {0};
+		#showme Resuming from deep rest...;
+		#if {!$singlestep} {
+			.bot;
+		};
+	};
+};
+
+
+#class {guru} {close}

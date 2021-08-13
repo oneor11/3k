@@ -1,0 +1,71 @@
+#class areareset {open}
+	#VAR {resetTime} {420};
+	#VAR {acceptPester} {0};
+
+	#ACTION {^{\w+} pesters you.} {
+		#IF {!${acceptPester}} { #RETURN; };
+
+		#local {mooch} {%1};
+		#format {mooch} {%l} ${mooch};
+		rally ${mooch};
+		#SEND ptell Welcome ${mooch}.  ${dungeonName} will be reset in ${remaining} seconds.;
+	};
+
+	#ACTION {^That person is a member of another party.} {
+		#SEND !say The rally for one of you failed because you are in a party. pquit, then "pester guru".;
+	};
+
+	#ACTION {^You have reset '{.*}' for {\w+}} {
+		#VAR {mooch} {%2};
+		#FORMAT {mooch} {%l} ${mooch};
+		#SEND !pboot ${mooch};
+		#SEND !tell ${mooch} ${dungeonName} has been reset for you.  May you carry on this best practice of offering dungeon resets when your powers reset.;
+		#SEND !bow ${mooch};
+	};
+
+	#ALIAS announceReset {
+		#VAR {acceptPester} {1};
+		#VAR {dungeonName} {%1};
+		#SEND !hm ${dungeonName} reset in ${resetTime} seconds sharp. Ensure you pquit and "pester guru" at area entrance.  This process is fully automated. Follow instructions precisely.;
+		#SEND !ct ${dungeonName} reset in ${resetTime} seconds sharp. Ensure you pquit and "pester guru" at area entrance.  This process is fully automated. Follow instructions precisely.;
+		#SEND !shout ${dungeonName} reset in ${resetTime} seconds sharp. Ensure you pquit and "pester guru" at area entrance.;
+		startResetTimer;
+	};
+
+	#ALIAS startResetTimer {
+		#TICKER {resetTimer} {
+			#MATH {elapsed} {${elapsed} + 1};
+			#MATH {remaining} {${resetTime} - ${elapsed}};
+			#MATH {mod} {${remaining} % 20};
+			#IF {${mod} == 0 && ${remaining} > 0} {
+				#SEND !say For those newly arrived: If interested in ${dungeonName} reset, pquit, then "pester guru".;
+				#SEND !ptell ${dungeonName} reset in ${remaining} seconds.;
+			}
+			{
+				#IF {${remaining} < 6 && ${remaining} > 0} {
+					#SEND !ptell ${remaining}...;
+				};
+			};
+			#MATH {mod} {${remaining} % 150};
+			#IF {${mod} == 0 && ${remaining} > 0} {
+				#SEND !hm ${dungeonName} reset in ${remaining} seconds sharp. Ensure you pquit and "pester guru" at area entrance.;
+				#SEND !ct ${dungeonName} reset in ${remaining} seconds sharp. Ensure you pquit and "pester guru" at area entrance.;
+				#SEND !shout ${dungeonName} reset in ${remaining} seconds sharp. Ensure you pquit and "pester guru" at area entrance.;                              
+                        };
+
+			
+			#IF {${remaining} == 0} {
+				endResetTimer;
+			};
+		} {1};
+	};
+	
+	#ALIAS endResetTimer {
+		#VAR {acceptPester} {0};
+		#UNTICKER resetTimer;
+		#SEND !ptell Resetting now.  Automatic pboot will follow.;
+		#SEND !(reset dungeon ${dungeonName} party;
+		#SEND !say ${dungeonName} reset complete.
+	};
+
+#class arearest {close}

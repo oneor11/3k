@@ -1,0 +1,99 @@
+#class death {open}
+
+	#nop USER CONFIGURATION;
+	#nop ======================================================================;
+	
+	#nop Controls the chat header and color.; 
+		#var {deathChatHeading} {<010>[**DEATH**]<099>};
+
+	#nop Controls the random flavor of the message.;
+	#nop Example: Guru got murdered by Guyahi.;
+	#nop Add or remove from list, but at least one entry must exist.;
+		#list {dflavor} clear;
+		#list {dflavor} add {died to};
+		#list {dflavor} add {got smoked by};
+		#list {dflavor} add {suffered a beat down to};
+		#list {dflavor} add {got pwned by};
+		#list {dflavor} add {was bested in combat by};
+		#list {dflavor} add {got gatted by};
+		#list {dflavor} add {was embarrassed by};
+		#list {dflavor} add {gots dey azz handed to 'em by};
+		#list {dflavor} add {is in the cemetery, courtesy of};
+		#list {dflavor} add {had no chance against};
+		#list {dflavor} add {was overwhelmed by};
+		#list {dflavor} add {got murdered by};
+		#list {dflavor} add {fell to};
+		#list {dflavor} add {crumpled to the ground lifeless at the feet of};
+		#list {dflavor} add {got absolutely slaughtered by};
+		#list {dflavor} add {was impaled on a stick by};
+		#list {dflavor} add {got shanked by};
+		#list {dflavor} add {bit off more than could be chewed against};
+
+	#nop Your favor homeboy or homegirl list.;
+	#nop When people in this list die, their name gets ansi and beep occurs.;
+	#nop Do not remove the first empty entry.;
+	#nop Example: #list {favs} add {Guru} <== Add a line for each player;
+		#list {favs} clear;
+		#list {favs} add {};
+		#list {favs} add {Elminster};
+		#list {favs} add {Lestat};
+		#list {favs} add {Fluffy};
+		#list {favs} add {Locrian};
+		#list {favs} add {Hoboerectus};
+		#list {favs} add {Echoloc};
+		#list {favs} add {Hooligan};
+		#list {favs} add {Rynn};
+		#list {favs} add {Melly};
+		#list {favs} add {Whoknows};
+		#list {favs} add {Alazar};
+		#list {favs} add {Haste};
+		#list {favs} add {Ellegon};
+		#list {favs} add {Kirwan};
+		#list {favs} add {Khan};
+		#list {favs} add {Maverik};
+
+	#nop ======================================================================
+
+
+	#action {{(\w+) screams as (.*) tears}} {
+		printDeathMessage %2 {%3};
+	};	
+
+	#action {{corpse of (\w+), courtesy of (.*)\.}} {
+		printDeathMessage %2 {%3};
+	};
+
+	#action {{(\w+)'s voice cries out a final note as (.*) tears}} {
+		printDeathMessage %2 {%3};
+	};
+
+	#action {{(\w+)'s body begins to glow so brightly you can see}} {
+		printDeathMessage %2 {Mage explosion};
+	};
+
+	#action {{(.*) tears through (\w+) with such force}} {
+		printDeathMessage %3 {%2};
+	};
+
+	#action {{You see the Grim Reaper drift over to the corpse of (\w+)}} {
+		#var pladeath %2;
+	};
+
+	#action {{wraith expresses gratitude to (.*) for}} {
+		printDeathMessage ${pladeath} {%2};
+	};
+
+	#alias printDeathMessage {
+		#math {chosenMessage} {1 d &{dflavor[]}};
+		#list {favs} find {%1} {found};
+		#if {${found}} {		
+			#var deathMessage {${deathChatHeading} <130>%1<099> ${dflavor[${chosenMessage}]} %2!};
+			#bell;
+		} {
+			#var deathMessage {${deathChatHeading} %1 ${dflavor[${chosenMessage}]} %2!};
+		};
+		update_chat ${deathMessage};
+	};
+
+
+#class death {close}

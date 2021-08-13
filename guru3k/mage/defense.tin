@@ -1,0 +1,88 @@
+#class {defense} {open}
+
+	#action {^You bring into being a shimmering Fortress of Power} {
+		soundAlarm 10 {SECURE SHELTER INITIATED};
+		#DELAY {shelter} {
+			out;
+			stopAlarm;
+			#DELAY {2} {
+				#SEND !cast slow;
+			};
+		} {60};
+	};
+
+	#alias setcont {
+		mapgo cot;
+		#SEND !cast perform as cast mind warp;
+		#SEND !cast activate combat;
+		#SEND !study spellbook;
+		#SEND !cast find familiar;
+		#SEND !cast deeppockets;
+		#SEND !cast light;
+		#SEND e;home;fantasy;w;enter;n;enter;n;buy cloak;wear cloak;keep cloak;buy circlet;wear circlet;keep circlet;s;out;s;exit;e;home;morgue;acquire coffin;home;
+
+		#DELAY {1} {
+			#NOP GC SLOT 1-MS;
+			#SEND !cast greater contingency as shield#cast magnificent shield;
+			#SEND !cast magnificent shield;
+			#DELAY {15} {
+				#NOP GC SLOT 2-SS;
+				#SEND !cast greater contingency as stoneskin#cast stoneskin;
+				#SEND !cast stoneskin;
+				#DELAY {15} {
+					#NOP GC SLOT 3-A;
+					#SEND !cast greater contingency as armor#cast armor;
+					#SEND !cast armor;
+					#DELAY {15} {
+						#NOP GC SLOT 4-MG;
+						#SEND !cast greater contingency as major globe#cast major globe;
+						#SEND !cast major globe;
+						#DELAY {15} {
+							#NOP GC SLOT 5-PE;
+							#SEND !cast greater contingency as protection from evil#cast protection from evil;
+							#SEND !cast protection from evil;
+							#DELAY {15} {
+								#NOP GC SLOT 6-PS-400;
+								#SEND !cast greater contingency as prismatic sphere#400#cast prismatic sphere;
+								#SEND !cast prismatic sphere;
+								#DELAY {15} {
+									#NOP GC SLOT 7-M-400;
+									#SEND !cast greater contingency as mantle#400#cast mantle;
+									#SEND !cast mantle;
+									#DELAY {15} {
+										#SEND !cast contingency as hp#900#cast secure shelter;
+										#DELAY {15} {
+											#SEND !cast contingency as sp#1000#cast secure shelter;
+											#DELAY {15} {
+												#SEND !cast mindblank;
+												#DELAY {15} {
+													#SEND !cast giant strength guru;
+													#SEND !woo guru;
+												};
+											};
+										};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+
+	#ALIAS cont {
+		#SEND !cast remove greater contingency as 7;
+		#SEND !cast remove greater contingency as 6;
+
+		#if {"%1" == "hard"} {
+			#SEND !cast greater contingency as prismatic sphere#2000#cast prismatic sphere;
+			#SEND !cast greater contingency as mantle#2000#cast mantle;
+		}{
+			#SEND !cast greater contingency as prismatic sphere#400#cast prismatic sphere;
+			#SEND !cast greater contingency as mantle#400#cast mantle;
+		};
+	};
+
+
+#class {defense} {close}

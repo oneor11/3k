@@ -1,0 +1,32 @@
+#class advancespam {open}
+
+	#alias advlvl {
+		#SEND remotevaf setpose arrives.;
+		#SEND pose;
+		#SEND remotevaf setpose takes A pale green capsule from your inventory!;
+		#SEND pose;
+		#SEND pose;
+		#SEND remotevaf setpose takes 93872 coins from your inventory!;
+		#SEND pose;
+		#SEND remotevaf setpose takes Ring of Heroism from your inventory!;
+		#SEND pose;
+		#SEND remotevaf setpose crushes the capsules, coins, and ring together using a mortar and pestle.;
+		#SEND pose;
+		#SEND remotevaf setpose removes his robes and rubs the concoction all over his buff, glistening, naked body.;
+		#SEND pose;
+		#SEND remotevaf setpose pulls out his spellbook bound with platinum straps and inlaid with sets of sapphires, rubies, emeralds, and diamonds.;
+		#SEND pose;
+		#SEND remotevaf setpose peruses the spellbook's Table of Contents and says,  "Ahh...yes. The Advance Level spell."; 
+		#SEND pose;
+		#SEND remotevaf setpose waves his arms, chants in an arcane language you do not understand, and then disappears through a portal.;
+		#SEND pose;
+
+		#DELAY {5} {
+			#SEND advance;
+			#SEND yes;
+		};
+	};
+
+
+
+#class advancespam {close}

@@ -1,0 +1,143 @@
+#CLASS magesptracker {open}
+
+	#VAR sptracker[on]			{0};
+	#VAR sptracker[spPrevious]		{0};
+	#VAR sptracker[spCurrent]		{0};
+	#VAR sptracker[netSpent]		{0};
+	#VAR sptracker[roundRegen]		{0};
+	#VAR sptracker[total][cost]		{0};
+	
+	#NOP [DEFENSE]
+	#VAR sptracker[mantle][cost]		{105};
+	#VAR sptracker[mantle][count]		{0};
+	
+	#VAR sptracker[stoneskin][cost]		{115};
+	#VAR sptracker[stoneskin][count]	{0};
+	
+	#VAR sptracker[majorglobe][cost]	{160};
+	#VAR sptracker[majorglobe][count]	{0};
+
+	#VAR sptracker[prissphere][cost]	{155};
+	#VAR sptracker[prissphere][count]	{0};
+	
+	#VAR sptracker[armor][cost]		{15};
+	#VAR sptracker[armor][count]		{0};
+	
+	#VAR sptracker[magshield][cost]		{110};
+	#VAR sptracker[magshield][count]	{0};
+
+        #VAR sptracker[protevil][cost]		{45};
+        #VAR sptracker[protevil][count]		{0};
+		
+
+	#NOP [OFFENSE]
+	
+	#VAR sptracker[mindwarp][cost]		{100};
+	#VAR sptracker[mindwarp][count]		{0};
+
+	#VAR sptracker[spelltap][cost]		{100};
+	#VAR sptracker[spelltap][count]		{0};
+
+
+
+	#ACTION {A shimmering field of grey expands from you} {
+		#IF {!$sptracker[on]} { #RETURN; };
+		#MATH {sptracker[mantle][count]}	{$sptracker[mantle][count] + 1};
+		#MATH {sptracker[total][cost]}		{$sptracker[total][cost] + $sptracker[mantle][cost]};
+	};
+	
+	#ACTION {Your skin begins to harden} {
+		#IF {!$sptracker[on]} { #RETURN; };
+		#MATH {sptracker[stoneskin][count]}	{$sptracker[stoneskin][count] + 1};
+		#MATH {sptracker[total][cost]}		{$sptracker[total][cost] + $sptracker[stoneskin][cost]};
+	};
+	
+	#ACTION {You feel safer as the major globe surrounds} {
+		#IF {!$sptracker[on]} { #RETURN; };
+		#MATH {sptracker[majorglobe][count]}	{$sptracker[majorglobe][count] + 1};
+		#MATH {sptracker[total][cost]}		{$sptracker[total][cost] + $sptracker[majorglobe][cost]};
+	};
+
+	#ACTION {A shimmering field of light expands from you and surrounds you} {
+		#IF {!$sptracker[on]} { #RETURN; };
+                #MATH {sptracker[prissphere][count]}    {$sptracker[prissphere][count] + 1};
+                #MATH {sptracker[total][cost]}          {$sptracker[total][cost] + $sptracker[prissphere][cost]};
+	};
+	
+	#ACTION {You wave your hands and an invisible barrier} {
+		#IF {!$sptracker[on]} { #RETURN; };
+		#MATH {sptracker[armor][count]}	{$sptracker[armor][count] + 1};
+		#MATH {sptracker[total][cost]}		{$sptracker[total][cost] + $sptracker[armor][cost]};
+	};
+	
+	#ACTION {You wave your hands and a transparent shield of force surrounds you} {
+		#IF {!$sptracker[on]} { #RETURN; };
+		#MATH {sptracker[magshield][count]}	{$sptracker[magshield][count] + 1};
+		#MATH {sptracker[total][cost]}		{$sptracker[total][cost] + $sptracker[magshield][cost]};
+	};
+
+	#ACTION {You cast protection from evil on yourself} {
+		#IF {!$sptracker[on]} { #RETURN; };
+                #MATH {sptracker[protevil][count]}     {$sptracker[protevil][count] + 1};
+                #MATH {sptracker[total][cost]}          {$sptracker[total][cost] + $sptracker[protevil][cost]};
+	};
+	
+	#ACTION {Your spell warps} {
+		#IF {!$sptracker[on]} { #RETURN; };
+		#MATH {sptracker[mindwarp][count]}	{$sptracker[mindwarp][count] + 1};
+		#MATH {sptracker[total][cost]}		{$sptracker[total][cost] + $sptracker[mindwarp][cost]};
+	};
+
+	#ACTION {You tap into} {
+                #IF {!$sptracker[on]} { #RETURN; };
+                #MATH {sptracker[spelltap][count]}      {$sptracker[spelltap][count] + 1};
+                #MATH {sptracker[total][cost]}          {$sptracker[total][cost] + $sptracker[spelltap][cost]};
+	};
+	
+	#ALIAS showsptracker {
+		#IF {$sptracker[on]} {
+			#VAR {sptracker[on]}	{0};
+		} {
+
+			#VAR {sptracker[on]}	{1};
+			resetSpTracker;
+		};
+
+	};
+	
+	#ALIAS calculateBaseSpRegen {
+		#IF {!$sptracker[on]} { #RETURN; };
+		#MATH {sptracker[netSpent]}	{$sptracker[spPrevious] - $sptracker[spCurrent]};
+		#MATH {sptracker[netHpSpent]}	{$sptracker[hpPrevious] - $sptracker[hpCurrent]};
+		#IF {$sptracker[netHpSpent] > 0} {
+			#MATH {sptracker[totHpSpent]} {$sptracker[totHpSpent] + $sptracker[netHpSpent]};
+		};
+		#VAR diff {0};
+		
+		#MATH {diff}	{$sptracker[spPrevious] - $sptracker[total][cost]};
+		#MATH {sptracker[roundRegen]}	{$sptracker[spCurrent] - $diff};
+		
+		#SHOWME =================================================================;
+		#SHOWME HP LOSS: $sptracker[netHpSpent]  TOTAL: $sptracker[totHpSpent];
+		#SHOWME M: $sptracker[mantle][count]  SS: $sptracker[stoneskin][count]  MG: $sptracker[majorglobe][count]  PS: $sptracker[prissphere][count]  A: $sptracker[armor][count]  MS: $sptracker[magshield][count]  PE: $sptracker[protevil][count];  
+		#SHOWME Tot Spent: $sptracker[total][cost] Net Spent: $sptracker[netSpent] All Regen: $sptracker[roundRegen] ST: $sptracker[spelltap][count];
+		#SHOWME =================================================================;
+
+		resetSpTracker;
+	};
+	
+	#ALIAS resetSpTracker {
+		#VAR sptracker[total][cost]		{0};
+		#VAR sptracker[mantle][count]		{0};
+		#VAR sptracker[stoneskin][count]	{0};
+		#VAR sptracker[majorglobe][count]	{0};
+		#VAR sptracker[prissphere][count]	{0};
+		#VAR sptracker[armor][count]		{0};
+		#VAR sptracker[magshield][count]	{0};
+		#VAR sptracker[protevil][count]		{0};
+		#VAR sptracker[mindwarp][count]		{0};
+		#VAR sptracker[spelltap][count]		{0};
+	
+	};
+	
+#CLASS magesptracker {close}

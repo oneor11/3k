@@ -1,0 +1,63 @@
+#CLASS {alarm} {open}
+	
+	#VAR {alarmStopped} {1};
+	#VAR {alarmInterval} {4};
+	#VAR {alarmDefaultMessage} {ALARM ALARM ALARM ALARM};
+	#VAR {alarmMessage} ${alarmDefaultMessage};
+
+	#ALIAS soundAlarm {
+		#VAR {alarmStopped} {0};
+		
+		#IF {"%1" == "help"} {
+			helpAlarm;
+			#RETURN;
+		};
+
+		#IF {%1} {
+			#VAR {alarmInterval} {%1};
+		};
+		
+		#IF {"%2" != ""} {
+			#VAR {alarmMessage} {%2};
+		}
+		{
+			#VAR {alarmMessage} ${alarmDefaultMessage};
+		};
+		ringBell;
+	};
+	
+	#ALIAS ringBell {
+		#IF {!${alarmStopped}} {
+			#BELL;
+			#SHOWME <517>********************************** ${alarmMessage} **********************************;
+			#DELAY {alarming} {
+				ringBell;
+			} {${alarmInterval}};
+		};	
+	};
+
+	#ALIAS stopAlarm {
+		#VAR {alarmStopped} {1};
+	};
+
+	#ALIAS helpAlarm {
+
+		#SHOWME *******************************************************************************;
+		#SHOWME <439>soundAlarm;
+		#SHOWME Sounds an audible and visual alarm that is configurable.  It takes two;
+		#SHOWME optional arguments:;
+		#SHOWME    ;
+		#SHOWME %%1 = alarm firing interval in seconds.  The default is 4 seconds.;
+		#SHOWME %%2 = alarm message.  The default is ALARM ALARM ALARM ALARM;
+		#SHOWME    ;
+		#SHOWME <469>Examples:;
+		#SHOWME soundAlarm;
+		#SHOWME soundAlarm 2;
+		#SHOWME soundAlarm 1 {SPELL POINTS LOW!!!};
+		#SHOWME	   ;
+		#SHOWME <439>stopAlarm;
+		#SHOWME Stops the alarm.;
+		#SHOWME *******************************************************************************;
+	};
+
+#CLASS {alarm} {close}

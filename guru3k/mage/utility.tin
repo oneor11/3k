@@ -1,0 +1,136 @@
+#class {utility} {open}
+
+	#var {reportGxp} {0};
+	#var {reportNoKill} {1};
+	#var {pocket} {1};
+	#var {blast} {1};
+	#var {st} {1};
+	#var {nokilltime} {240};
+
+	#ticker {gxpsend} {
+		#SHOWME Sending gxp...;
+		#SEND !lstats;
+	} {600};
+
+	#action {GXP Per Hour{\s+}:{\s+}{.+}} {
+		#if {${reportGxp}} {
+			sendmail {GXP} "{%3}";
+		};
+	};
+
+	#alias resetNoKill {
+		#UNTICKER nokill;
+		#IF {${reportNoKill}} {
+			#TICKER nokill {
+				#IF {${reportNoKill}} {
+					sendmail {NOKILL} {NOKILL};
+				};
+			} {$nokilltime};
+		};
+	};
+
+	#alias refxpmage {
+		#SEND !cast fabricate as dagger#dagger#dagger;
+		#SEND !cast fabricate as dagger#dagger#dagger;
+		#SEND !cast fabricate as dagger#dagger#dagger;
+		#SEND !cast fabricate as dagger#dagger#dagger;
+		#SEND !cast fabricate as item#forge#forge;
+
+		#SEND !get dagger;
+		#SEND !reforge dagger with little from edged to penetrate;
+		#SEND !dispose dagger;
+
+                #SEND !get dagger;
+                #SEND !reforge dagger with little from edged to penetrate;
+                #SEND !dispose dagger;
+
+                #SEND !get dagger;
+                #SEND !reforge dagger with little from edged to penetrate;
+                #SEND !dispose dagger;
+
+		#SEND !get dagger;
+                #SEND !reforge dagger with little from edged to penetrate;
+                #SEND !dispose dagger;
+
+		#SEND !get forge;
+		#SEND !dispose forge;
+	};
+
+	#action {Your deeppocket begins to fade} {
+		#SEND !cast deeppockets;
+	};
+
+	#ACTION {All your corpses are already bigger than what is here.} {
+		cast corpse blast;
+		divvy gold;
+	};
+
+	#ACTION {The coffin expels a corpse!} {
+		#if {$blast} {
+			cast corpse blast;
+			divvy gold;
+		};
+	};
+
+	#ACTION {With great magical precision you}{
+		#SEND !cast giant strength guru;
+		#SEND !cast spell tap never;
+	};
+
+	#ACTION {Your immersion has expired} {
+		#if {$st} {
+			#SEND cast spell tap always;
+		};
+	};
+
+	#ACTION {A Strong Fortress of Protection} {
+		study spellbook;
+	};
+
+	#ACTION {: Ok.} {
+		#IF {${pocket}} {
+			put all in pocket;
+		};
+	};
+
+	#ACTION {The effects of the pale %1 capsule} {
+		#SEND !get %1 capsule from pocket;
+		#SEND !eat %1 capsule;
+	};
+
+	#ACTION {seems to speed up} {
+		#SEND !cast slow;
+	};
+
+	#ACTION {You don't have any basic construction materials} {
+		#SEND !ffetch materials;
+		#DELAY {5} {
+			#SEND !cast create golem as crystal;
+		};
+	};
+	#ACTION {You throw your golem construction materials} {
+		#SEND !dispose materials;
+	};
+
+	#ALIAS szpause {
+		#path save forward sz[path];
+		#path save position sz[position];
+		#SEND !pause game;
+	};
+
+	#ALIAS szunpause {
+		#SEND !unpause;
+		- sectionz40_short;
+		#path load $sz[path];
+		#path goto $sz[position];
+	};
+
+	#alias tofb {
+		e;e;n;n;w;w;n;n;n;w;w;n;w;
+	};
+	
+	#alias fromfb {
+		e;s;e;e;s;s;s;e;e;s;s;w;w;
+	};
+
+#class {utility} {close}

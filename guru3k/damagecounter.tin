@@ -1,0 +1,80 @@
+#CLASS {damagecounter} {open}
+	#NOP REQUIRES adding showDamageSummary call from your kblow action: ;
+	
+	#VAR {trackDamage}		{1};
+	#VAR {battle[totalDamage]}		{0};
+	#VAR {battle[totalRounds]}		{0};
+	#VAR {battle[minDamage]}		{10000};
+	#VAR {battle[maxDamage]}		{0};
+	#VAR {eradRounds}		{0};
+	#VAR {isEradRound}		{0};
+	#VAR {maxDamageNoErad}		{0};
+	#VAR {totalDamageNoErad}	{0};
+	
+	#SEND !(gs;
+
+	#ACTION {^! Guild Level : {\d+}} {
+		#MATH {eradDamage} {500 + ({%1} * 100)};
+	};
+
+	#ACTION {^A bolt of pure energy flies out of the sky} {
+		#VAR {isEradRound} {1};
+		#MATH {eradRounds} {${eradRounds} + 1};
+	};
+	
+	#ACTION {^You hit {[\w\s]*} {\d+} time%!{.*}for {\d+} damage.} {
+		#if {!${trackDamage}} { #RETURN; };
+
+		#VAR {mobName} {%1};
+		#MATH {battle[totalDamage]} {${battle[totalDamage]} + %3};
+		#MATH {battle[totalRounds]} {${battle[totalRounds]} + 1};
+		
+
+		#IF {%3 < ${battle[minDamage]}} {
+			#VAR {battle[minDamage]} {%3};
+		};
+		#IF {%3 > ${battle[maxDamage]}} {
+			#VAR {battle[maxDamage]} {%3};
+		};
+	};
+
+	#ALIAS trackDamage {
+		#IF {${trackDamage}} {
+			#VAR {trackDamage} {0};
+			#SHOWME [DAMAGE TRACKER DISABLED];
+		}
+		{
+			#VAR {trackDamage} {1};
+			#SHOWME [DAMAGE TRACKER ENABLED];
+		};
+
+	};
+
+	#ALIAS resetDamage {
+		#VAR {battle[totalDamage]}		{0};
+		#VAR {battle[totalRounds]}		{0};
+		#VAR {battle[minDamage]}		{10000};
+		#VAR {battle[maxDamage]}		{0};
+		#VAR {eradRounds}		{0};
+		#VAR {isEradRound}		{0};
+		#VAR {maxDamageNoErad}		{0};
+		#VAR {totalDamageNoErad}	{0};		
+	};
+
+	#ALIAS showDamageSummary {
+		#if {!${trackDamage}} { #RETURN; };
+
+		#MATH {battle[avgDamage]} {${battle[totalDamage]} / ${battle[totalRounds]}};
+		#FORMAT {battle[totalDamage]}	{%d} ${battle[totalDamage]};
+		#FORMAT {battle[totalRounds]}	{%d} ${battle[totalRounds]};
+		#FORMAT {battle[minDamage]}	{%d} ${battle[minDamage]};
+		#FORMAT {battle[maxDamage]}	{%d} ${battle[maxDamage]};
+		#FORMAT {battle[avgDamage]}	{%d} ${battle[avgDamage]};
+
+		#LIST {dam} {add} ${battle[avgDamage]};
+	 
+		#SHOWME [RNDS: ${battle[totalRounds]} | DAM: ${battle[totalDamage]} | MAX: ${battle[maxDamage]} | MIN: ${battle[minDamage]} | AVG: ${battle[avgDamage]}];
+		resetDamage; 
+	};
+
+#CLASS {damagecounter} {close}

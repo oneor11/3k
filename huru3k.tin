@@ -1,0 +1,75 @@
+#class {huru} {open}
+
+#var guild android;
+
+#NOP Read in char-specific files
+#read .tt/char/guru3k/mage/defense.tin;
+#read .tt/char/guru3k/mage/utility.tin;
+#read .tt/char/guru3k/comms.tin;
+#read .tt/char/guru3k/alarm.tin;
+#read .tt/char/guru3k/interaction.tin;
+#read .tt/char/guru3k/eternal.tin;
+#read .tt/char/guru3k/damagecounter.tin;
+#read .tt/char/guru3k/reset.tin;
+#read .tt/char/guru3k/circuit.tin;
+#read .tt/3k/reforger.tin;
+#read .tt/char/guru3k/mage/sptracker.tin;
+
+#var {resting} {0};
+
+#NOP  HP:[1579/786];
+#act {{^HP:\[(\d+)/(\d+)\]}} {
+	#var {droidbar[hp][current]}	{%2};
+	#var {droidbar[hp][max]}	{%3};
+
+	#if {${droidbar[hp][current]} < ${droidbar[hp][max]}} {
+		#SEND !nanosurge;
+	};
+};
+
+#alias update_status {
+	
+};
+
+#alias stepCharPostKillChecks {
+	dog feed;
+	resetNoKill;
+	#IF {${trackDamage}} { 
+		showDamageSummary; 
+	};
+
+	#delay {2};
+
+	#showme Checking mage sps;
+	#if {${droidbar[hp][current]} < ${droidbar[hp][max]}} {
+		#SEND !hp;
+		rest;
+	}
+	{
+		#showme Resuming from light check...;
+		#if {!$singlestep} {
+			.bot;
+		};
+	};
+};
+
+#alias rest {
+	#VAR {resting} {1};
+	#SEND !hp;
+	#if {${droidbar[hp][current]} < 1500} {
+		#SHOWME Recovering...;
+		#DELAY {5} {
+			rest;
+		};
+	}
+	{
+		#VAR {resting} {0};
+		#showme Resuming from deep rest...;
+		#if {!$singlestep} {
+			.bot;
+		};
+	};
+};
+
+
+#class {huru} {close}
