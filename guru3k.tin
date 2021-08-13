@@ -7,7 +7,6 @@
 #read .tt/char/guru3k/mage/utility.tin;
 #read .tt/char/guru3k/comms.tin;
 #read .tt/char/guru3k/alarm.tin;
-#read .tt/char/guru3k/interaction.tin;
 #read .tt/char/guru3k/eternal.tin;
 #read .tt/char/guru3k/damagecounter.tin;
 #read .tt/3k/reforger.tin;
