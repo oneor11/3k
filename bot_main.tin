@@ -1,0 +1,178 @@
+#class {bot} {open};
+
+/* Disable items while botting */
+mapoff
+prompt >$nl$
+
+/* Build Party Variable */
+#send !pwho
+
+/* Initialize Variables */
+#var foundmob 0
+#var foundplayer 0
+#var goldfound 0
+#var itemfound 0
+#var bot 0
+#var vacuum 1
+#var singlestep 0
+
+
+#alias {.pause} {
+	#class {xbot} {kill};
+	#alias {_check_mob} {.pause}
+}
+
+#alias {.stop} {
+	#map get {roomvnum} {bots[vnum]};
+	#path save forward bots[path];
+	#path save position bots[position];
+	#class {xbot} {kill};
+	#alias {xx} {#nop};
+	#alias {_check_mob} {#nop};
+	#var halt 1
+}
+
+#alias {.resume} {
+	#map run $bots[vnum];
+	#path load $bots[path];
+	#path goto $bots[position];
+	#var halt 0;
+	#delay {2} {.bot}
+}
+
+#alias {.single} {
+	#var singlestep 1
+}
+
+#alias {_check_mob} {#NOP}
+
+#alias {..} {
+	#undelay gohome;
+	#var bot 1;
+	#var halt 0;
+	#class {xbot} {open};
+	#delay {4};
+	#act {{^\[roo\]}} {xx} {1};
+	#alias {xx} {
+		#var foundplayer 0;
+		#var goldfound 0;
+		#var itemfound 0;
+		#act {^>$} {
+			#if {$itemfound && !$foundplayer && $vacuum} {
+				#send !get all
+			};
+			#if {$goldfound && !$foundplayer} {
+				#send !get coins
+			};
+			#path walk;
+			#unact {^>$}
+		} {1}
+	};
+	#alias {_check_mob} {
+		#act {^>$} {
+			#unact {^>$};
+			#if {$foundplayer} {
+				#path walk
+			} {
+				.pause;
+				#if {$slow} {
+					cast slow on $mobname;
+				}
+				{
+					kill $mobname;
+				};
+				#if {$hasEwell} {
+					#DELAY {2} {
+						#SEND !(energy well;
+					};
+				};
+				#var foundmob 1;
+				#if {$itemfound && $vacuum} {
+					get all
+				};
+				#if {$goldfound} {
+					#send !get coins
+				}
+			}
+		}
+	};
+	#send !glance;
+	#class {xbot} {close}
+}
+
+#act { gold coins.$} {
+	#var goldfound 1
+}
+
+#act {^=A= } {
+	#var itemfound 1
+}
+#act {^=W= } {
+	#var itemfound 1
+}
+#act {^=I= } {
+	#var itemfound 1
+}
+
+#alias {killbot} {
+	.stop;
+	#class bot kill;
+	#unalias {.bot};
+	#var bot 0;
+	#var mobname {};
+}
+
+#alias {.bot} {
+	#if {$halt == 0} {
+		#delay {0} {..}
+	}
+}
+
+#alias {dogtank} {#alias {kill} {#delay {2} {dog sicem %%0}}}
+#alias {nodogtank} {#unalias {kill}};
+
+#act {^%1 dealt the killing blow to} {
+	stepCharPostKillChecks;
+} {1}
+
+/* Detect Players */
+#act {^\[pla\]%*} {
+	#var party_simple $party;
+	#list party_simple simplify;
+	#var party_found 0;
+	#foreach {$party_simple} {party_member} {
+		#REGEX {%0} {$party_member} {#var party_found 1}
+	};
+	#if {!${party_found}} {
+		#var foundplayer 1
+	}
+} {6}
+
+/* Skip room on Mob */
+#NOP #act {Crikey} {#var foundplayer 1}
+
+#alias {v %1} {#if {"%1" == "on"} {#var vacuum 1} {#var vacuum 0}}
+
+#act {#PATH WALK: #END OF PATH} {
+	#if {$no_loop || !$foundmob} {
+		killbot;
+		#if {&{botcycle[]} > 1} {
+			nextarea
+		}; #else {
+			#if {!$no_home} {go home}
+		}
+	} {
+		#unact {^>$};
+		#path load botpath;
+		#var foundmob 0;
+		.bot
+	}
+}
+
+
+
+
+#path load botpath
+#var halt 2
+
+#class {bot} {close}
