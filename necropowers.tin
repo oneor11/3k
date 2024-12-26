@@ -1,0 +1,27 @@
+#class {necropowers} {kill};
+#class {necropowers} {open};
+
+#nop Triggers off of the "repower" necro command to capture both the power names and currently available uses in the "powers" array.;
+#nop As you gain powers or uses of those powers throughout your necro journey, this script will automatically pick it up.;
+#nop Power names are in lowercase with slashes and spaces replaced with "-".  Example:  #show $powers[conjure-undead];
+
+#action {{->\s(\w+(?:\/\w+)*[ \w+]*?)(?:\s\(\w+(?:\/\w+)*\))*\s*-\s(?:(Available\sfor\suse)(?:\s\((\d*)\))*)*(?:(Must wait for repower))*}} {
+        #var powername {%2};
+        #var availability {%3};
+
+        #if {%4} {
+                #var powercount {%4};
+        } {
+                #if {"$availability" == "Available for use"} {
+                        #var powercount 1;
+                } {
+                        #var powercount 0;
+                };
+        };
+
+        #format {powername} {%l} {$powername};
+        #replace {powername} {{\/|\s}} {-};
+        #var powers[$powername] $powercount;
+};
+
+#class {necropowers} {close};
